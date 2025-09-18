@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/class_page_styles.css">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+    <title>Class Details</title>
+
+    <script src="/static/js/config.js"></script>
+    <script>
+        (function () {
+            if (localStorage.getItem("darkMode") === "true") {
+                document.documentElement.classList.add("dark-mode");
+            }
+        })();
+    </script>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <section class="nav_bar_section">
+        <nav class="navbar">
+            <div class="navdiv">
+                <div class="logo"></div>
+                <div class="nav_links">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+                    </button>
+                    <a href="{{ url_for('lecturer_notification') }}">
+                      <i class="far fa-bell"></i>
+                        <span>Notification</span>
+                    </a>
+                    <a href="{{ url_for('lecturer_profile') }}">
+                      <i class="far fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="toggle-btn" id="toggleBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2>Edu-Portal</h2>
+        </div>
+
+        <div class="menu">
+            <div class="menu-category">Class</div>
+            <a href="#" class="menu-item active">
+                <i class="fas fa-book"></i>
+                <span class="menu-text">Class Details</span>
+            </a>
+            <a href="{{ url_for('lecturer_take_attendance', class_id=class_id) }}" id="takeAttendanceLink" class="menu-item">
+              <i class="fas fa-user-check"></i>
+                <span class="menu-text">Take Attendance</span>
+            </a>
+            <a href="{{ url_for('lecturer_attendance_history', class_id=class_id) }}" id="historyLink" class="menu-item">
+              <i class="fas fa-chart-bar"></i>
+                <span class="menu-text">Attendance History</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Class Content -->
+    <a href="{{ url_for('lecturer_dashboard') }}" class="back-btn">⬅ Back to Classes</a>
+    <h1 id="className"></h1>
+    <p id="classDetails"></p>
+
+    <h3 class="student-list-text">Students in Class</h3>
+    <div class="student-list">
+        <table id="studentTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Student ID</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody id="studentTableBody">
+                <!-- Populated dynamically -->
+            </tbody>
+        </table>
+    </div>
+
+    <button id="downloadBtn">Download Class List (PDF)</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            // Ensure token is available
+            async function ensureToken() {
+                let token = sessionStorage.getItem("tapin_token");
+                if (!token) {
+                    try {
+                        const res = await fetch('/api/get_token');
+                        if (res.ok) {
+                            const data = await res.json();
+                            token = data.token;
+                            sessionStorage.setItem("tapin_token", token);
+                        } else {
+                            window.location.href = '/lecturer_login';
+                            return null;
+                        }
+                    } catch (err) {
+                        console.error('Failed to get token:', err);
+                        window.location.href = '/lecturer_login';
+                        return null;
+                    }
+                }
+                return token;
+            }
+            const pathname = window.location.pathname;
+            const classIdMatch = pathname.match(/\/lecturer\/class\/(\d+)$/);
+            const classId = classIdMatch ? parseInt(classIdMatch[1]) : null;
+
+            const classDetails = document.getElementById("classDetails");
+            const studentTableBody = document.getElementById("studentTableBody");
+
+            async function api(path, options = {}) {
+                try {
+                    const response = await fetch(window.getApiUrl(path), {
+                        ...options,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(options.headers || {}),
+                            ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+                        },
+                    });
+
+                    let data;
+                    try {
+                        data = await response.json();
+                    } catch (jsonErr) {
+                        data = { error: await response.text() || 'Invalid response format' };
+                    }
+
+                    if (!response.ok) {
+                        const errorMsg = data.error || data.message || `HTTP ${response.status}: ${response.statusText}`;
+                        if (response.status === 401) {
+                            alert('Session expired. Please log in again.');
+                            window.location.href = '/lecturer_login';
+                            return { error: errorMsg };
+                        }
+                        return { error: errorMsg };
+                    }
+
+                    return data;
+                } catch (err) {
+                    console.error("API Error:", err);
+                    return { error: "Network error. Please check your connection." };
+                }
+            }
+
+            const token = await ensureToken();
+            if (!token) {
+                return;
+            }
+
+            if (!classId) {
+                alert("No class selected. Redirecting...");
+                window.location.href = "/lecturer/dashboard";
+                return;
+            }
+
+            async function loadClassDetails() {
+                const res = await api(`/api/classes/${classId}`);
+                if (res.error) {
+                    classDetails.innerHTML = `<p class="error">${res.error}</p>`;
+                    return;
+                }
+
+                document.getElementById("className").textContent = res.class_name;
+                classDetails.innerHTML = `
+                    <p>Course: ${res.course_name} (${res.course_code})</p>
+                    <p>Programme: ${res.programme}, Level: ${res.level}</p>
+                    <p>Department: ${res.department}</p>
+                    <p>Faculty: ${res.faculty}</p>
+                    <p>Section: ${res.section}</p>
+                    <small>Join PIN: ${res.join_pin}</small>
+                `;
+            }
+
+            async function loadStudentList() {
+                const res = await api(`/api/classes/${classId}/students`);
+                studentTableBody.innerHTML = "";
+
+                if (res.error || !res.length) {
+                    studentTableBody.innerHTML = `
+                        <tr><td colspan="4" style="text-align:center;color:#888;">No students joined yet.</td></tr>
+                    `;
+                    return;
+                }
+
+                res.forEach((student, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${student.fullname}</td>
+                        <td>${student.student_id || 'N/A'}</td>
+                        <td>${student.email}</td>
+                    `;
+                    studentTableBody.appendChild(row);
+                });
+            }
+
+            await loadClassDetails();
+            await loadStudentList();
+
+            // Sidebar toggle
+            const toggleBtn = document.getElementById("toggleBtn");
+            const sidebar = document.getElementById("sidebar");
+            toggleBtn.addEventListener("click", () => {
+                sidebar.classList.toggle("collapsed");
+                const icon = toggleBtn.querySelector("i");
+                sidebar.classList.contains("collapsed")
+                    ? icon.classList.replace("fa-bars", "fa-chevron-right")
+                    : icon.classList.replace("fa-chevron-right", "fa-bars");
+                localStorage.setItem("sidebarCollapsed", sidebar.classList.contains("collapsed"));
+            });
+
+            if (window.innerWidth <= 768) sidebar.classList.add("collapsed");
+            window.addEventListener("resize", () => {
+                if (window.innerWidth <= 768) sidebar.classList.add("collapsed");
+            });
+        });
+    </script>
+</body>
+
+</html>

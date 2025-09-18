@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance History</title>
+    <link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/class_page_styles.css">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+
+    <script src="/static/js/config.js"></script>
+    <script>
+        // Apply dark mode immediately to prevent flash
+        (function () {
+            if (localStorage.getItem("darkMode") === "true") {
+                document.documentElement.classList.add("dark-mode");
+            }
+        })();
+    </script>
+
+    <style>
+        .attendance-rec {
+            transition: var(--transition-speed);
+        }
+
+        #loadingMsg,
+        #errorMsg {
+            text-align: center;
+            font-size: 1.1em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <section class="nav_bar_section">
+        <nav class="navbar">
+            <div class="navdiv">
+                <div class="logo"></div>
+                <div class="nav_links">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+                    </button>
+                    <a href="{{ url_for('lecturer_notification') }}"><i class="far fa-bell"></i><span>Notification</span></a>
+                    <a href="{{ url_for('lecturer_profile') }}"><i class="far fa-user"></i><span>Profile</span></a>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="toggle-btn" id="toggleBtn">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h2>Edu-Portal</h2>
+        </div>
+        <div class="menu">
+            <div class="menu-category">Class</div>
+            <a href="{{ url_for('lecturer_class_page', class_id=class_id) }}" id="detailsLink" class="menu-item">
+                <i class="fas fa-book"></i>
+                <span class="menu-text">Class Details</span>
+            </a>
+            <a href="{{ url_for('lecturer_take_attendance', class_id=class_id) }}" id="takeAttendanceLink" class="menu-item">
+                <i class="fas fa-user-check"></i>
+                <span class="menu-text">Take Attendance</span>
+            </a>
+            <a href="{{ url_for('lecturer_attendance_history') }}" id="historyLink" class="menu-item active">
+                <i class="fas fa-chart-bar"></i>
+                <span class="menu-text">Attendance History</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Back button -->
+    <a href="#" id="backBtn" class="back-btn">⬅ Back to Class</a>
+
+    <!-- Class details -->
+    <h1 id="className"></h1>
+    <p id="classDetails"></p>
+
+    <!-- Attendance Records -->
+    <h3 class="attendance-rec">Attendance Records</h3>
+    <div class="student-list">
+        <p id="loadingMsg">Loading attendance records...</p>
+        <p id="errorMsg" style="display: none; color: red;"></p>
+        <table id="attendanceTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Present Students</th>
+                    <th>Absent Students</th>
+                </tr>
+            </thead>
+            <tbody id="attendanceBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const pathMatch = window.location.pathname.match(/attendance-history\/(\d+)/);
+            const classId = pathMatch ? pathMatch[1] : urlParams.get("id");
+
+            if (!classId) {
+                document.body.innerHTML = "<h2>Class not found</h2>";
+                return;
+            }
+
+            // Update navigation links
+            const links = {
+                detailsLink: `/lecturer/class/${classId}`,
+                takeAttendanceLink: `/lecturer/take-attendance/${classId}`,
+                historyLink: `/lecturer/attendance-history?id=${classId}`,
+                backBtn: `/lecturer/class/${classId}`
+            };
+            Object.entries(links).forEach(([id, href]) => {
+                const el = document.getElementById(id);
+                if (el) el.href = href;
+            });
+
+            const loadingMsg = document.getElementById("loadingMsg");
+            const errorMsg = document.getElementById("errorMsg");
+            const table = document.getElementById("attendanceTable");
+            const tbody = document.getElementById("attendanceBody");
+
+            const token = localStorage.getItem("token");
+            const headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            };
+
+            try {
+                // Fetch class details
+                const classRes = await fetch(`/api/classes/${classId}`, { headers });
+                if (!classRes.ok) throw new Error("Failed to load class details");
+                const cls = await classRes.json();
+                document.getElementById("className").textContent = cls.class_name;
+                document.getElementById("classDetails").textContent =
+                    `${cls.course_name} (${cls.course_code}) - PIN: ${cls.join_pin}`;
+
+                // Fetch attendance history
+                const historyRes = await fetch(`/api/classes/${classId}/attendance/history`, { headers });
+                if (!historyRes.ok) throw new Error("Failed to load attendance history");
+                const history = await historyRes.json();
+
+                loadingMsg.style.display = "none";
+                table.style.display = "table";
+
+                if (history.length === 0) {
+                    const row = tbody.insertRow();
+                    const cell = row.insertCell();
+                    cell.colSpan = 3;
+                    cell.textContent = "No attendance records yet.";
+                    cell.style.textAlign = "center";
+                } else {
+                    history.forEach(record => {
+                        const row = tbody.insertRow();
+                        row.insertCell().textContent = new Date(record.timestamp).toLocaleString();
+                        row.insertCell().textContent = record.present.join(", ") || "None";
+                        row.insertCell().textContent = record.absent.join(", ") || "None";
+                    });
+                }
+            } catch (err) {
+                loadingMsg.style.display = "none";
+                errorMsg.textContent = err.message;
+                errorMsg.style.display = "block";
+            }
+        });
+
+        // Sidebar toggle
+        const toggleBtn = document.getElementById("toggleBtn");
+        const sidebar = document.getElementById("sidebar");
+        toggleBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("collapsed");
+            const icon = toggleBtn.querySelector("i");
+            if (sidebar.classList.contains("collapsed")) {
+                icon.classList.replace("fa-bars", "fa-chevron-right");
+                localStorage.setItem("sidebarCollapsed", "true");
+            } else {
+                icon.classList.replace("fa-chevron-right", "fa-bars");
+                localStorage.setItem("sidebarCollapsed", "false");
+            }
+        });
+
+        // Auto-collapse sidebar on smaller screens
+        function checkScreenSize() {
+            if (window.innerWidth <= 768) sidebar.classList.add("collapsed");
+        }
+        window.addEventListener("resize", checkScreenSize);
+        checkScreenSize();
+    </script>
+
+    <script src="/static/js/lecturer_page_js/theme.js"></script>
+</body>
+
+</html>

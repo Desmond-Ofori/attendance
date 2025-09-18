@@ -1,0 +1,481 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+    <title>Lecturer Classes</title>
+
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/auth.js"></script>
+    <script>
+    (function() {
+        if (localStorage.getItem("darkMode") === "true") {
+            document.documentElement.classList.add("dark-mode");
+        }
+    })();
+    </script>
+
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap');
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <section class="nav_bar_section">
+        <nav class="navbar">
+            <div class="navdiv">
+                <div class="logo"></div>
+                <div class="nav_links">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+                    </button>
+                    <a href="{{ url_for('lecturer_notification') }}">
+                        <i class="far fa-bell"></i>
+                        <span>Notification</span>
+                    </a>
+                    <a href="{{ url_for('lecturer_profile') }}">
+                        <i class="far fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+          <button class="toggle-btn" id="toggleBtn">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h2>Edu-Portal</h2>
+      </div>
+
+      <div class="menu">
+        <div class="menu-category">Home</div>
+        <a href="{{ url_for('lecturer_home') }}" class="menu-item">
+          <i class="fas fa-home"></i>
+          <span class="menu-text">Home</span>
+          <span class="tooltip">Home</span>
+        </a>
+
+        <div class="menu-category">Academic</div>
+        <a href="#" class="menu-item active">
+          <i class="fas fa-book"></i>
+          <span class="menu-text">My Classes</span>
+          <span class="tooltip">My Classes</span>
+        </a>
+
+        <div class="menu-category">Lecturer Info</div>
+        <a href="{{ url_for('lecturer_announcements') }}" class="menu-item">
+          <i class="fas fa-bullhorn"></i>
+          <span class="menu-text">Announcement</span>
+          <span class="tooltip">Announcement</span>
+        </a>
+        <a href="{{ url_for('lecturer_profile') }}" class="menu-item">
+          <i class="fas fa-calendar-day"></i>
+          <span class="menu-text">Profile</span>
+          <span class="tooltip">Profile</span>
+        </a>
+        <a href="{{ url_for('lecturer_settings') }}" class="menu-item">
+          <i class="fas fa-cog"></i>
+          <span class="menu-text">Settings</span>
+          <span class="tooltip">Settings</span>
+        </a>
+
+        <div class="menu-category">About</div>
+        <a href="{{ url_for('lecturer_about') }}" class="menu-item">
+          <i class="fas fa-info-circle"></i>
+          <span class="menu-text">About Us</span>
+          <span class="tooltip">About Us</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+      <div class="card">
+        <h1>Dashboard</h1>
+        <p>Welcome To TapIn!
+            <br>Your smart attendance dashboard is ready.
+            Track and manage your classes with precision.</p>
+      </div>
+
+      <section>
+        <div class="create_class_button">
+            <button id="createClassBtn" title="Create Class">+</button>
+        </div>
+        <div id="classList" class="class-list">
+            <!-- Classes will load here dynamically -->
+        </div>
+      </section>
+    </div>
+
+    <!-- Create Class Modal -->
+    <div id="classFormContainer" class="modal">
+        <div class="modal-content">
+            <span id="closeForm" class="close">&times;</span>
+            <h2>Create a Class</h2>
+            <form id="classForm">
+                <label>Programme</label>
+                <input type="text" id="programme" name="programme" required>
+                 
+                <label>Faculty</label>
+                <input type="text" id="faculty" name="faculty" required>
+                 
+                <label>Department</label>
+                <input type="text" id="department" name="department" required>
+                 
+                <label>Course Name</label>
+                <input type="text" id="courseName" name="courseName" required>
+                 
+                <label>Course Code</label>
+                <input type="text" id="courseCode" name="courseCode" required>
+                 
+                <label>Level</label>
+                <select id="level" name="level" required>
+                    <option value="">Select Level</option>
+                    <option>100</option>
+                    <option>200</option>
+                    <option>300</option>
+                    <option>400</option>
+                </select>
+                 
+                <label>Section</label>
+                <select id="section" name="section" required>
+                    <option value="">Select Section</option>
+                    <option>Full Time (Morning)</option>
+                    <option>Part Time (Evening)</option>
+                    <option>Distance (Weekend)</option>
+                </select>
+                <label>Join PIN</label>
+                <input type="text" id="joinPin" name="joinPin" readonly>
+                <button type="button" id="generatePin" class="btn-secondary">Generate PIN</button>
+                <button type="submit" class="btn-primary">Create Class</button>
+            </form>
+        </div>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        // Global auth handles init; proceed directly
+        const classList = document.getElementById("classList");
+        const modal = document.getElementById("classFormContainer");
+        const form = document.getElementById("classForm");
+        const createBtn = document.getElementById("createClassBtn");
+        const closeBtn = document.getElementById("closeForm");
+        const generatePinBtn = document.getElementById("generatePin");
+
+        // Reusable API helper using direct fetch
+        const api = async (path, options = {}) => {
+            const token = sessionStorage.getItem("tapin_token");
+            const url = window.getApiUrl(`/api${path}`);
+            let headers = {
+                'Content-Type': 'application/json',
+                ...(options.headers || {})
+            };
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            const response = await fetch(url, {
+                ...options,
+                headers,
+                credentials: 'same-origin'
+            });
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (jsonErr) {
+                data = { error: await response.text() || 'Invalid response format' };
+            }
+
+            if (!response.ok) {
+                const errorMsg = data.error || data.message || `HTTP ${response.status}: ${response.statusText}`;
+                return { error: errorMsg, status: response.status };
+            }
+
+            return data;
+        };
+
+        // Ensure token is available
+        async function ensureToken() {
+            let token = sessionStorage.getItem("tapin_token");
+            if (!token) {
+                try {
+                    const res = await fetch('/api/get_token');
+                    if (res.ok) {
+                        const data = await res.json();
+                        token = data.token;
+                        sessionStorage.setItem("tapin_token", token);
+                    } else {
+                        window.location.href = '/lecturer_login';
+                        return null;
+                    }
+                } catch (err) {
+                    console.error('Failed to get token:', err);
+                    window.location.href = '/lecturer_login';
+                    return null;
+                }
+            }
+            return token;
+        }
+
+        // Load classes from backend
+        async function loadClasses() {
+            console.log('[LECTURER HOME DEBUG] loadClasses() starting - token present:', !!sessionStorage.getItem('tapin_token'));
+            try {
+                console.log('[LECTURER HOME DEBUG] Calling api("/classes")...');
+                const res = await api('/classes');
+                console.log('[LECTURER HOME DEBUG] /api/classes response:', { hasError: !!res.error, dataLength: res ? res.length : 'none' });
+                classList.innerHTML = '';
+
+                if (res && res.error) {
+                    let displayMsg = res.error;
+                    if (res.status === 401) {
+                        alert('Session expired. Please log in again.');
+                        window.location.href = '/lecturer_login';
+                        return;
+                    } else if (res.status === 403) {
+                        displayMsg = `${res.error}. <a href="#" onclick="window.location.href='/api/auth/resend?role=lecturer'; return false;">Resend verification email</a> or contact support.`;
+                    }
+                    classList.innerHTML = `<p style='color:orange;'>${displayMsg}</p>`;
+                    console.error('Load classes auth error:', res.error);
+                    return;
+                }
+
+                if (!res || res.length === 0) {
+                    classList.innerHTML = "<p style='color:#888;'>No classes created yet.</p>";
+                    return;
+                }
+
+                res.forEach(cls => {
+                    const div = document.createElement('div');
+                    div.classList.add('class-item');
+                    div.innerHTML = `
+                        <div class="class-info" onclick="localStorage.setItem('selectedClassId', ${cls.id}); window.location.href='/lecturer/class/${cls.id}'">
+                            <h3>${cls.course_name}</h3>
+                            <p>${cls.programme} - ${cls.level} (${cls.section})</p>
+                            <small>PIN: ${cls.join_pin}</small>
+                        </div>
+                        <button class="generate-link-btn" onclick="generateLink(${cls.id})" title="Generate Join Link">🔗</button>
+                        <button class="delete-btn" onclick="deleteClassBackend(${cls.id})">✖</button>
+                    `;
+                    classList.appendChild(div);
+                });
+            } catch (err) {
+                console.log('[LECTURER HOME DEBUG] /api/classes error caught:', { error: err, message: err.message || err.error });
+                let errorMessage = 'Failed to load classes. Please try again.';
+                if (err && err.error) {
+                    errorMessage = err.error;
+                } else if (err.message) {
+                    errorMessage = err.message;
+                }
+                console.log('[LECTURER HOME DEBUG] Error message:', errorMessage, '- contains "Session expired":', errorMessage.includes('Session expired'));
+                if (errorMessage.includes('Session expired') || errorMessage.includes('Unauthorized')) {
+                    alert('Your session has expired. Please log in again.');
+                    window.location.href = '/lecturer_login';
+                    return;
+                }
+                classList.innerHTML = `<p style='color:red;'>${errorMessage}</p>`;
+                console.error('Load classes error:', err);
+                console.log('[LECTURER HOME DEBUG] loadClasses() ended with error');
+            }
+            console.log('[LECTURER HOME DEBUG] loadClasses() completed successfully');
+        }
+
+        // Delete class
+        window.deleteClassBackend = async (classId) => {
+            if (!confirm("Are you sure you want to delete this class?")) return;
+            try {
+                const res = await api(`/classes/${classId}`, { method: 'DELETE' });
+                if (res.error) {
+                    alert(res.error);
+                } else {
+                    alert("Class deleted successfully!");
+                    loadClasses();
+                }
+            } catch (err) {
+                alert('Failed to delete class.');
+                console.error(err);
+            }
+        };
+
+        // Generate link
+        window.generateLink = async (classId) => {
+            try {
+                const res = await api(`/classes/${classId}/generate_link`, { method: 'POST' });
+                if (res.error) {
+                    alert(res.error);
+                } else {
+                    navigator.clipboard.writeText(res.link).then(() => {
+                        alert(`Link copied to clipboard: ${res.link}\nStudents can join by clicking this link after logging in.`);
+                    }).catch(() => {
+                        prompt('Link generated. Copy this to share:', res.link);
+                    });
+                }
+            } catch (err) {
+                alert('Failed to generate link.');
+                console.error(err);
+            }
+        };
+
+        // Create new class
+            form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            
+            // Frontend validation
+            const programme = form.programme.value.trim();
+            const faculty = form.faculty.value.trim();
+            const department = form.department.value.trim();
+            const courseName = form.courseName.value.trim();
+            const courseCode = form.courseCode.value.trim();
+            const level = form.level.value;
+            const section = form.section.value;
+            const joinPin = form.joinPin.value.trim() || Math.floor(100000 + Math.random() * 900000).toString();
+            
+            // Required fields
+            if (!programme || !faculty || !department || !courseName || !courseCode || !level || !section) {
+                alert('All fields are required.');
+                return;
+            }
+            
+            // Length checks
+            if (programme.length > 100 || faculty.length > 100 || department.length > 100 || courseName.length > 160 || courseCode.length > 20 || level.length > 20 || section.length > 40) {
+                alert('Some fields exceed maximum length. Shorten them.');
+                return;
+            }
+            
+            // Course code format: e.g., CS101
+            const courseCodeRegex = /^[A-Z]{2,4}\d{3,4}$/;
+            if (!courseCodeRegex.test(courseCode)) {
+                alert('Invalid course code format. Use format like CS101 or MATH201.');
+                return;
+            }
+            
+            const classData = {
+                programme,
+                faculty,
+                department,
+                course_name: courseName,
+                course_code: courseCode,
+                level,
+                section,
+                join_pin: joinPin
+            };
+            const res = await api('/classes', {
+                method: 'POST',
+                body: JSON.stringify(classData)
+            });
+            if (res && res.error) {
+                let msg = res.error;
+                if (res.status === 401) {
+                    alert('Session expired. Please log in again.');
+                    window.location.href = '/lecturer_login';
+                    return;
+                } else if (res.status === 403) {
+                    msg = `${res.error}. Please verify your email first.`;
+                    alert(msg);
+                    return;
+                }
+                alert(`Failed to create class: ${msg}. Please try again.`);
+            } else {
+                localStorage.setItem('selectedClassId', res.id);
+                if (res.join_link) {
+                    alert(`Class created successfully!\nJoin link: ${res.join_link}\nShare this with students to join the class.\nNavigating to class...`);
+                } else {
+                    alert("Class created successfully!\nNavigating to class...");
+                }
+                form.reset();
+                modal.style.display = 'none';
+                window.location.href = `/lecturer/class/${res.id}`;
+            }
+        });
+
+        // Open/close modal
+        createBtn.addEventListener("click", () => {
+            console.log('Create class button clicked');
+            if (!sessionStorage.getItem("tapin_token")) {
+                alert('Please log in to create a class.');
+                window.location.href = '/lecturer_login';
+                return;
+            }
+            modal.style.display = "flex";
+        });
+        closeBtn.addEventListener("click", () => modal.style.display = "none");
+
+        // Generate random PIN
+        generatePinBtn.addEventListener("click", () => {
+            form.joinPin.value = Math.floor(100000 + Math.random() * 900000);
+        });
+
+        // Load classes immediately after setup
+        await ensureToken();
+        await loadClasses();
+
+        // Sidebar + theme toggle
+        const toggleBtn = document.getElementById("toggleBtn");
+        const sidebar = document.getElementById("sidebar");
+        if (localStorage.getItem("sidebarCollapsed") === "true") {
+            sidebar.classList.add("collapsed");
+            toggleBtn.querySelector("i").classList.replace("fa-bars", "fa-chevron-right");
+        }
+
+        toggleBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("collapsed");
+            const icon = toggleBtn.querySelector("i");
+            if (sidebar.classList.contains("collapsed")) {
+                icon.classList.replace("fa-bars", "fa-chevron-right");
+                localStorage.setItem("sidebarCollapsed", "true");
+            } else {
+                icon.classList.replace("fa-chevron-right", "fa-bars");
+                localStorage.setItem("sidebarCollapsed", "false");
+            }
+        });
+
+        window.addEventListener("resize", () => {
+            if (window.innerWidth <= 768) sidebar.classList.add("collapsed");
+        });
+
+        // Add CSS for the new button
+        const style = document.createElement('style');
+        style.textContent = `
+            .generate-link-btn {
+                background: #4CAF50;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                margin-left: 5px;
+                font-size: 14px;
+            }
+            .generate-link-btn:hover {
+                background: #45a049;
+            }
+            .class-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+        `;
+        document.head.appendChild(style);
+    });
+</script>
+
+
+    <script src="/static/js/lecturer_page_js/theme.js"></script>
+    <script src="/static/js/error_handler.js"></script>
+&lt;/script&gt;
+</body>
+</html>

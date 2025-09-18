@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Announcements</title>
+    <link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css">
+
+   <script>
+  (function() {
+    if (localStorage.getItem("darkMode") === "true") {
+      document.documentElement.classList.add("dark-mode");
+    }
+  })();
+</script>
+
+<style>
+    .announcement-list {
+        list-style: none;
+        padding: 0;
+    }
+    .announcement-list li {
+        padding: 10px;
+        background: #FFF8E7;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        cursor: pointer;
+        
+    }
+    .announcement-list li.read {
+        background: #ddd;
+        text-decoration: line-through;
+        color: gray;
+    }
+    .announcement-list {
+    list-style: none;
+    padding: 0;
+}
+
+.announcement-list li {
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: #FFF8E7; /* light background for light mode */
+    color: #000; /* dark text for visibility */
+    border: 1px solid #ccc;
+}
+
+.announcement-list li.read {
+    background: #ddd;
+    text-decoration: line-through;
+    color: gray;
+}
+
+/* Dark Mode Styling */
+.dark-mode .announcement-list li {
+    background: #2a2a2a;
+    color: #f5f5f5;
+    border: 1px solid #444;
+}
+
+.dark-mode .announcement-list li.read {
+    background: #555;
+    color: #aaa;
+}
+.announcement-list li:hover {
+    background: #f1e4c0;
+}
+
+.dark-mode .announcement-list li:hover {
+    background: #3a3a3a;
+}
+
+    </style>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+</head>
+<body>
+
+    <!-- Navbar -->
+   <section class="nav_bar_section">
+    <nav class="navbar">
+      <div class="navdiv">
+        <div class="logo"></div>
+        <div class="nav_links">
+          <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+            <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+          </button>
+          <a href="{{ url_for('lecturer_notification') }}"><i class="far fa-bell"></i><span>Notification</span></a>
+          <a href="{{ url_for('lecturer_profile') }}"><i class="far fa-user"></i><span>Profile</span></a>
+        </div>
+      </div>
+    </nav>
+  </section>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <button class="toggle-btn" id="toggleBtn"><i class="fas fa-bars"></i></button>
+      <h2>Edu-Portal</h2>
+    </div>
+    <div class="menu">
+      <div class="menu-category">Home</div>
+      <a href="{{ url_for('lecturer_home') }}" class="menu-item">
+        <i class="fas fa-home"></i>
+        <span class="menu-text">Home</span>
+        <span class="tooltip">Home</span>
+      </a>
+      <div class="menu-category">Academic</div>
+      <a href="{{ url_for('lecturer_dashboard') }}" class="menu-item"><i class="fas fa-book"></i><span class="menu-text">My Classes</span></a>
+
+      
+      <div class="menu-category">Lecturer Info</div>
+      <a href="{{ url_for('lecturer_announcements') }}" class="menu-item active"><i class="fas fa-bullhorn"></i><span class="menu-text">Announcement</span></a>
+      <a href="{{ url_for('lecturer_profile') }}" class="menu-item"><i class="fas fa-user"></i><span class="menu-text">Profile</span></a>
+      <a href="{{ url_for('lecturer_settings') }}" class="menu-item"><i class="fas fa-cog"></i><span class="menu-text">Settings</span></a>
+
+      <div class="menu-category">About</div>
+      <a href="{{ url_for('lecturer_about') }}" class="menu-item"><i class="fas fa-info-circle"></i><span class="menu-text">About Us</span></a>
+    </div>
+  </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="card">
+            <h1>Announcements</h1>
+            <ul id="announcementList" class="announcement-list"></ul>
+        </div>
+    </div>
+
+       
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const announcementList = document.getElementById("announcementList");
+
+        // Example announcements (would come from server in real app)
+        const announcements = [
+            { id: 1, text: "Semester starts on September 1st." },
+            { id: 2, text: "Submit your attendance reports by the 25th of each month." },
+            { id: 3, text: "System maintenance scheduled for next Sunday." }
+        ];
+
+        // Load read status
+        let readAnnouncements = JSON.parse(localStorage.getItem("readAnnouncements")) || [];
+
+        function renderAnnouncements() {
+            announcementList.innerHTML = "";
+            announcements.forEach(a => {
+                const li = document.createElement("li");
+                li.textContent = a.text;
+                li.className = readAnnouncements.includes(a.id) ? "read" : "";
+                li.addEventListener("click", function () {
+                    if (!readAnnouncements.includes(a.id)) {
+                        readAnnouncements.push(a.id);
+                        localStorage.setItem("readAnnouncements", JSON.stringify(readAnnouncements));
+                        renderAnnouncements();
+                    }
+                });
+                announcementList.appendChild(li);
+            });
+        }
+        renderAnnouncements();
+    });
+    </script>
+
+     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sidebar = document.getElementById("sidebar");
+
+    // Load saved sidebar state
+    if (localStorage.getItem("sidebarCollapsed") === "true") {
+      sidebar.classList.add("collapsed");
+      toggleBtn.querySelector("i").classList.replace("fa-bars","fa-chevron-right");
+    }
+
+    toggleBtn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      const icon = toggleBtn.querySelector("i");
+      if (sidebar.classList.contains("collapsed")) {
+        icon.classList.replace("fa-bars","fa-chevron-right");
+        localStorage.setItem("sidebarCollapsed","true");
+      } else {
+        icon.classList.replace("fa-chevron-right","fa-bars");
+        localStorage.setItem("sidebarCollapsed","false");
+      }
+    });
+
+    const checkScreen = () => { if (window.innerWidth <= 768) sidebar.classList.add("collapsed"); };
+    window.addEventListener("resize", checkScreen);
+    checkScreen();
+  });
+     </script>
+    <script src="/static/js/lecturer_page_js/theme.js"></script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Settings</title>
+    <link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <script>
+        // Apply dark mode immediately
+        (function () {
+            if (localStorage.getItem("darkMode") === "true") {
+                document.documentElement.classList.add("dark-mode");
+            }
+        })();
+    </script>
+    <style>
+        .card {
+            background-color: beige;
+            padding: 2rem;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            margin-left: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.6rem 0.8rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            display: block;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.8rem;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .sidebar {
+            transition: all 0.3s ease;
+            width: 250px;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .sidebar .menu-text {
+            display: inline;
+        }
+
+        .sidebar.collapsed .menu-text {
+            display: none;
+        }
+
+        .sidebar~.card {
+            margin-left: 290px;
+        }
+
+        @media(max-width:748px) {
+            .card {
+                max-width: 300px;
+            }
+
+            .sidebar.collapsed~.card {
+                margin-left: 290px;
+            }
+
+            .sidebar {
+                width: 220px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar -->
+    <section class="nav_bar_section">
+        <nav class="navbar">
+            <div class="navdiv">
+                <div class="logo"></div>
+                <div class="nav_links">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+                    </button>
+                    <a href="{{ url_for('lecturer_notification') }}"><i class="far fa-bell"></i><span>Notification</span></a>
+                    <a href="{{ url_for('lecturer_profile') }}"><i class="far fa-user"></i><span>Profile</span></a>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="toggle-btn" id="toggleBtn"><i class="fas fa-bars"></i></button>
+            <h2>Edu-Portal</h2>
+        </div>
+        <div class="menu">
+            <div class="menu-category">Home</div>
+            <a href="{{ url_for('lecturer_home') }}" class="menu-item"><i class="fas fa-home"></i><span
+                    class="menu-text">Home</span></a>
+            <div class="menu-category">Academic</div>
+            <a href="{{ url_for('lecturer_dashboard') }}" class="menu-item"><i class="fas fa-book"></i><span class="menu-text">My
+                    Classes</span></a>
+            <div class="menu-category">Lecturer Info</div>
+            <a href="{{ url_for('lecturer_announcements') }}" class="menu-item"><i class="fas fa-bullhorn"></i><span
+                    class="menu-text">Announcement</span></a>
+            <a href="{{ url_for('lecturer_profile') }}" class="menu-item"><i class="fas fa-user"></i><span
+                    class="menu-text">Profile</span></a>
+            <a href="{{ url_for('lecturer_settings') }}" class="menu-item active"><i class="fas fa-cog"></i><span
+                    class="menu-text">Settings</span></a>
+            <div class="menu-category">About</div>
+            <a href="{{ url_for('lecturer_about') }}" class="menu-item"><i class="fas fa-info-circle"></i><span
+                    class="menu-text">About Us</span></a>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main-content">
+        <div class="card">
+            <h1>Settings</h1>
+            <form id="settingsForm">
+                <label>Name</label>
+                <input type="text" name="name" required>
+
+                <label>Email</label>
+                <input type="email" name="email" required>
+
+                <label>Phone Number</label>
+                <input type="tel" name="phone">
+
+                <label>Change Password</label>
+                <input type="password" name="password">
+
+                <button type="submit" class="btn-primary">Save Settings</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/static/js/lecturer_page_js/theme.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toggleBtn = document.getElementById("toggleBtn");
+            const sidebar = document.getElementById("sidebar");
+
+            if (localStorage.getItem("sidebarCollapsed") === "true") {
+                sidebar.classList.add("collapsed");
+                toggleBtn.querySelector("i").classList.replace("fa-bars", "fa-chevron-right");
+            }
+
+            toggleBtn.addEventListener("click", () => {
+                sidebar.classList.toggle("collapsed");
+                const icon = toggleBtn.querySelector("i");
+                if (sidebar.classList.contains("collapsed")) {
+                    icon.classList.replace("fa-bars", "fa-chevron-right");
+                    localStorage.setItem("sidebarCollapsed", "true");
+                } else {
+                    icon.classList.replace("fa-chevron-right", "fa-bars");
+                    localStorage.setItem("sidebarCollapsed", "false");
+                }
+            });
+
+            const checkScreen = () => { if (window.innerWidth <= 768) sidebar.classList.add("collapsed"); };
+            window.addEventListener("resize", checkScreen);
+            checkScreen();
+
+            // --- Backend integration ---
+            const form = document.getElementById("settingsForm");
+            const TOKEN = sessionStorage.getItem("tapin_token");
+
+            async function fetchProfile() {
+                const res = await fetch("/api/profile/me", {
+                    headers: { "Authorization": `Bearer ${TOKEN}` }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    form.name.value = data.name || "";
+                    form.email.value = data.email || "";
+                    form.phone.value = data.phone || "";
+                } else {
+                    console.error("Failed to load profile");
+                }
+            }
+
+            async function saveProfile(data) {
+                const res = await fetch("/api/profile/update-profile", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${TOKEN}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                return res.ok;
+            }
+
+            fetchProfile();
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const payload = {
+                    name: form.name.value,
+                    email: form.email.value,
+                    phone: form.phone.value,
+                    password: form.password.value || undefined
+                };
+                const success = await saveProfile(payload);
+                if (success) alert("Settings saved successfully!");
+                else alert("Failed to save settings. Try again.");
+            });
+
+
+        });
+    </script>
+</body>
+
+</html>

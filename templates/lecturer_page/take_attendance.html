@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Take Attendance</title>
+<link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+<link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css">
+<link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+<script>
+  (function() {
+    if (localStorage.getItem("darkMode") === "true") {
+      document.documentElement.classList.add("dark-mode");
+    }
+  })();
+  window.CLASS_ID = {{ class_id | tojson | safe }};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+.attendance-methods {
+    padding: 20px;
+    text-align: center;
+}
+.attendance-methods h1 {
+    color: goldenrod;
+    margin-bottom: 30px;
+}
+.method-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px; flex-wrap: wrap;
+}
+.method-card {
+    display: block;
+    width: 250px;
+    background: #f5f5dc;
+    padding: 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: black;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.method-card i {
+    font-size: 40px;
+    color: goldenrod;
+    margin-bottom: 15px;
+}
+.method-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: goldenrod;
+}
+
+.method-card p {
+    font-size: 0.9rem;
+    color: #333;
+}
+.method-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+}
+html:not(.dark-mode) .method-card  {
+    color: goldenrod;
+}
+
+.container {
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition-speed);
+}
+.setup-section, .live-attendance {
+    max-width: 500px;
+    margin: auto;
+}
+input, .startBtn {
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+.startBtn {
+    background: goldenrod;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+.startBtn:hover {
+    background: darkgoldenrod;
+}
+ul {
+    list-style: none;
+    padding: 0;
+}
+li { padding: 8px;
+    background: #f5f5dc;
+    margin: 5px 0;
+    border-radius: 5px;
+}
+.countdown {
+    font-size: 1.5em;
+    color: darkred;
+    margin: 15px 0;
+}
+.hidden {
+    display: none;
+}
+.back-btn {
+    margin-bottom: 20px;
+    align-self: self-end;
+    display: inline-block;
+    cursor: pointer;
+    text-decoration: none;
+    border: 0px;
+    background: none;
+    margin-top: 6px;
+    color: goldenrod;
+    font-size: 1rem;
+}
+
+html.light-mode .back-btn {
+    color: black;
+}
+
+.back-btn a {
+    text-decoration: none;
+}
+
+.back-btn:hover {
+    color: darkgoldenrod;
+    text-decoration: underline;
+}
+html.dark-mode h2 {
+    color: darkgoldenrod;
+}
+html.dark-mode .pIn-btn {
+    color: beige;
+}
+html.dark-mode .countdown {
+    color:red;
+}
+html.light-mode h2, p {
+    color: rgb(46, 39, 0);
+}
+
+@media (max-width:748px) {
+    .sidebar ~.container{
+        margin-left:240px ;
+    }
+    .sidebar.collapsed ~.container{
+        margin-left:90px ;
+    }
+}
+</style>
+</head>
+<body>
+
+<section class="nav_bar_section">
+        <nav class="navbar">
+            <div class="navdiv">
+                <div class="logo"></div>
+                <div class="nav_links">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+                    </button>
+                    <a href="{{ url_for('lecturer_notification') }}"><i class="far fa-bell"></i><span>Notification</span></a>
+                    <a href="{{ url_for('lecturer_profile') }}"><i class="far fa-user"></i><span>Profile</span></a>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <button class="toggle-btn" id="toggleBtn"><i class="fas fa-bars"></i></button>
+        <h2>EduPortal</h2>
+    </div>
+    <div class="menu">
+        <div class="menu-category">Class</div>
+        <a href="{{ url_for('lecturer_class_page', class_id=class_id) }}" id="detailsLink" class="menu-item">
+          <i class="fas fa-book"></i> <span class="menu-text">Class Details</span>
+        </a>
+        <a href="#" id="takeAttendanceLink" class="menu-item active">
+            <i class="fas fa-user-check"></i> <span class="menu-text">Take Attendance</span>
+        </a>
+        <a href="{{ url_for('lecturer_attendance_history', class_id=class_id) }}" id="historyLink" class="menu-item">
+          <i class="fas fa-chart-bar"></i> <span class="menu-text">Attendance History</span>
+        </a>
+    </div>
+</div>
+
+<!-- Method Selection -->
+<main class="attendance-methods" id="methodSelection">
+    <h1>Choose Attendance Method</h1>
+    <div class="method-container">
+        <a href="#" class="method-card" id="geofenceBtn">
+            <i class="fas fa-map-marker-alt"></i>
+            <h2>Geofencing</h2>
+            <p >Mark attendance automatically when students are in your location.</p>
+        </a>
+        <a href="#" class="method-card" id="pinBtn">
+            <i class="fas fa-key"></i>
+            <h2>PIN Code</h2>
+            <p>Allow students to join attendance by entering a PIN code.</p>
+        </a>
+    </div>
+</main>
+
+<!-- Geofencing Section -->
+<div class="container hidden" id="geofencingSection">
+    <button class="back-btn" id="backFromGeo">← Back</button>
+    <div class="setup-section" id="geoSetup">
+        <h2>Geofencing Attendance</h2>
+        <p class="pIn-btn">Set attendance duration (minutes):</p>
+        <input type="number" id="geoDuration" min="1" value="5">
+        <br>
+        <button id="geoStartBtn" class="startBtn">Start Attendance</button>
+    </div>
+    <div class="live-attendance hidden" id="geoLive">
+        <h2>Live Attendance</h2>
+        <p class="countdown" id="geoCountdown">Time left: --:--</p>
+        <ul id="geoStudentList"></ul>
+    </div>
+</div>
+
+<!-- PIN Code Section -->
+<div class="container hidden" id="pinSection">
+    <button class="back-btn" id="backFromPin">← Back</button>
+    <div class="setup-section" id="pinSetup">
+        <h2>PIN Code Attendance</h2>
+        <p class="pIn-btn">Set attendance PIN code:</p>
+        <input type="text" id="pinCodeInput" placeholder="Enter PIN" maxlength="6">
+        <p class="pIn-btn"> Set attendance duration (minutes):</p>
+        <input type="number" id="pinDuration" min="1" value="5">
+        <br>
+        <button id="pinStartBtn" class="startBtn">Start Attendance</button>
+    </div>
+    <div class="live-attendance hidden" id="pinLive">
+        <h2>Live Attendance</h2>
+        <p class="pIn-btn"><strong>PIN Code:</strong> <span id="displayPin"></span></p>
+        <p class="countdown" id="pinCountdown">Time left: --:--</p>
+        <ul id="pinStudentList"></ul>
+    </div>
+</div>
+
+<script>
+// Get class ID from template or URL path
+let classId = window.CLASS_ID || localStorage.getItem("selectedClassId");
+const pathname = window.location.pathname;
+const match = pathname.match(/take-attendance\/(\d+)/);
+if (match) {
+    classId = match[1];
+    localStorage.setItem("selectedClassId", classId);
+}
+
+if (!classId) {
+    alert("No class selected. Please select a class first.");
+    window.location.href = "/lecturer/dashboard";
+}
+
+// Get authentication token
+const token = sessionStorage.getItem("tapin_token") || localStorage.getItem("tapin_token");
+if (!token) {
+    alert("Please log in to take attendance.");
+    window.location.href = "/lecturer_login";
+}
+
+// API helper function
+async function apiCall(endpoint, options = {}) {
+    const url = window.getApiUrl(endpoint);
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        ...options.headers
+    };
+    
+    try {
+        const response = await fetch(url, { ...options, headers });
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        return data;
+    } catch (error) {
+        console.error('API call failed:', error);
+        throw error;
+    }
+}
+
+// Initialize Socket.IO with proper configuration
+const socket = io({
+    transports: ['websocket', 'polling'],
+    query: {
+        token: token,
+        classId: classId
+    }
+});
+
+// Socket.IO event handlers
+socket.on('connect', () => {
+    console.log('Connected to server');
+    socket.emit('join_class', { classId: classId });
+});
+
+socket.on('student_checked_in', (data) => {
+    console.log('Student checked in:', data);
+    const studentName = data.name || `Student ${data.student_id}`;
+    const checkInTime = new Date(data.check_in_time).toLocaleTimeString();
+
+    // Add to appropriate list based on current method
+    if (!document.getElementById("geofencingSection").classList.contains("hidden")) {
+        // Geofencing mode
+        const li = document.createElement("li");
+        li.textContent = `${studentName} ✓ (${checkInTime})`;
+        document.getElementById("geoStudentList").appendChild(li);
+        geoAttendanceList.push({name: studentName, checkInTime: checkInTime});
+    } else if (!document.getElementById("pinSection").classList.contains("hidden")) {
+        // PIN mode
+        const li = document.createElement("li");
+        li.textContent = `${studentName} ✓ (${checkInTime})`;
+        document.getElementById("pinStudentList").appendChild(li);
+        pinAttendanceList.push({name: studentName, checkInTime: checkInTime});
+    }
+});
+
+socket.on('error', (data) => {
+    console.error('Socket error:', data.message);
+    alert('Connection error: ' + data.message);
+});
+
+socket.on('joined', (data) => {
+    console.log('Successfully joined class room:', data.classId);
+});
+
+ // Sidebar toggle
+        const toggleBtn = document.getElementById("toggleBtn");
+        const sidebar = document.getElementById("sidebar");
+        toggleBtn.addEventListener("click", () => {
+            sidebar.classList.toggle("collapsed");
+            const icon = toggleBtn.querySelector("i");
+            if (sidebar.classList.contains("collapsed")) {
+                icon.classList.replace("fa-bars", "fa-chevron-right");
+                localStorage.setItem("sidebarCollapsed", "true");
+            } else {
+                icon.classList.replace("fa-chevron-right", "fa-bars");
+                localStorage.setItem("sidebarCollapsed", "false");
+            }
+        });
+
+        // Auto-collapse sidebar on smaller screens
+        function checkScreenSize() {
+            if (window.innerWidth <= 768) sidebar.classList.add("collapsed");
+        }
+        window.addEventListener("resize", checkScreenSize);
+        checkScreenSize();
+    
+
+// Method selection buttons
+const methodSelection = document.getElementById("methodSelection");
+const geofenceSection = document.getElementById("geofencingSection");
+const pinSection = document.getElementById("pinSection");
+
+document.getElementById("geofenceBtn").addEventListener("click", () => {
+    methodSelection.classList.add("hidden");
+    geofenceSection.classList.remove("hidden");
+});
+
+document.getElementById("pinBtn").addEventListener("click", () => {
+    methodSelection.classList.add("hidden");
+    pinSection.classList.remove("hidden");
+});
+
+// Back buttons
+document.getElementById("backFromGeo").addEventListener("click", () => {
+    geofenceSection.classList.add("hidden");
+    methodSelection.classList.remove("hidden");
+});
+
+document.getElementById("backFromPin").addEventListener("click", () => {
+    pinSection.classList.add("hidden");
+    methodSelection.classList.remove("hidden");
+});
+
+/* ----------------- Geofencing Logic ----------------- */
+let geoTimer, geoTimeLeft, geoAttendanceList = [], currentSessionId = null;
+
+document.getElementById("geoStartBtn").addEventListener("click", async () => {
+    let duration = parseInt(document.getElementById("geoDuration").value);
+    if (!duration || duration <= 0) {
+        alert("Enter valid duration.");
+        return;
+    }
+
+    try {
+        // Get current location
+        const pos = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        });
+
+        const lecturerLat = pos.coords.latitude;
+        const lecturerLng = pos.coords.longitude;
+
+        // Start session via API
+        const data = await apiCall(`/classes/${classId}/sessions`, {
+            method: 'POST',
+            body: JSON.stringify({
+                method: 'geo',
+                duration_sec: duration * 60,
+                lecturer_lat: lecturerLat,
+                lecturer_lng: lecturerLng,
+                radius_m: 100  // 100 meter radius
+            })
+        });
+
+        currentSessionId = data.session_id;
+        startGeoSession(duration * 60);
+
+    } catch (err) {
+        console.error('Error starting geo session:', err);
+        alert("Could not start geofencing session: " + err.message);
+    }
+});
+
+function startGeoSession(durationSec) {
+    document.getElementById("geoSetup").classList.add("hidden");
+    document.getElementById("geoLive").classList.remove("hidden");
+
+    geoTimeLeft = durationSec;
+    updateGeoCountdown();
+    geoTimer = setInterval(() => {
+        geoTimeLeft--;
+        updateGeoCountdown();
+        if (geoTimeLeft <= 0) {
+            clearInterval(geoTimer);
+            endGeoSession();
+        }
+    }, 1000);
+}
+
+function updateGeoCountdown() {
+    let mins = Math.floor(geoTimeLeft/60);
+    let secs = geoTimeLeft % 60;
+    document.getElementById("geoCountdown").textContent = `Time left: ${mins}:${secs<10?"0":""}${secs}`;
+}
+
+async function endGeoSession(){
+    try {
+        // Close session via API
+        await apiCall(`/sessions/${currentSessionId}/close`, {
+            method: 'PATCH'
+        });
+        
+        alert("Attendance session ended.");
+        generateGeoPDF();
+        
+    } catch (err) {
+        console.error('Error closing session:', err);
+        alert("Error closing session: " + err.message);
+    } finally {
+        document.getElementById("geoLive").classList.add("hidden");
+        document.getElementById("geoSetup").classList.remove("hidden");
+        document.getElementById("geoStudentList").innerHTML = "";
+        geoAttendanceList = [];
+        currentSessionId = null;
+    }
+}
+
+function generateGeoPDF(){
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Geofencing Attendance Report", 10, 10);
+    doc.setFontSize(12);
+    
+    let y = 20;
+    geoAttendanceList.forEach((s, i) => {
+        if (y > 270) { // Add new page if needed
+            doc.addPage();
+            y = 20;
+        }
+        doc.text(`${i+1}. ${s.name} (${s.checkInTime})`, 10, y);
+        y += 8;
+    });
+    
+    doc.save("geofencing_attendance_report.pdf");
+}
+
+/* ----------------- PIN Code Logic ----------------- */
+let pinTimer, pinTimeLeft, pinAttendanceList = [];
+
+document.getElementById("pinStartBtn").addEventListener("click", async () => {
+    let pin = document.getElementById("pinCodeInput").value.trim();
+    let duration = parseInt(document.getElementById("pinDuration").value);
+    
+    if(!pin || pin.length !== 6){
+        alert("Enter a valid 6-digit PIN.");
+        return;
+    }
+    
+    if(!duration || duration <= 0){
+        alert("Enter valid duration.");
+        return;
+    }
+
+    try {
+        // Start session via API
+        const data = await apiCall(`/classes/${classId}/sessions`, {
+            method: 'POST',
+            body: JSON.stringify({
+                method: 'pin',
+                pin_code: pin,
+                duration_sec: duration * 60
+            })
+        });
+
+        currentSessionId = data.session_id;
+        startPinSession(duration * 60, pin);
+
+    } catch (err) {
+        console.error('Error starting PIN session:', err);
+        alert("Could not start PIN session: " + err.message);
+    }
+});
+
+function startPinSession(durationSec, pin) {
+    document.getElementById("pinSetup").classList.add("hidden");
+    document.getElementById("pinLive").classList.remove("hidden");
+    document.getElementById("displayPin").textContent = pin;
+
+    pinTimeLeft = durationSec;
+    updatePinCountdown();
+    pinTimer = setInterval(() => {
+        pinTimeLeft--;
+        updatePinCountdown();
+        if(pinTimeLeft <= 0) {
+            clearInterval(pinTimer);
+            endPinSession();
+        }
+    }, 1000);
+}
+
+function updatePinCountdown(){
+    let mins = Math.floor(pinTimeLeft/60);
+    let secs = pinTimeLeft % 60;
+    document.getElementById("pinCountdown").textContent = `Time left: ${mins}:${secs<10?"0":""}${secs}`;
+}
+
+async function endPinSession(){
+    try {
+        // Close session via API
+        await apiCall(`/sessions/${currentSessionId}/close`, {
+            method: 'PATCH'
+        });
+        
+        alert("Attendance session ended.");
+        generatePinPDF();
+        
+    } catch (err) {
+        console.error('Error closing session:', err);
+        alert("Error closing session: " + err.message);
+    } finally {
+        document.getElementById("pinLive").classList.add("hidden");
+        document.getElementById("pinSetup").classList.remove("hidden");
+        document.getElementById("pinStudentList").innerHTML = "";
+        pinAttendanceList = [];
+        currentSessionId = null;
+    }
+}
+
+function generatePinPDF(){
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("PIN Code Attendance Report", 10, 10);
+    doc.setFontSize(12);
+    
+    let y = 20;
+    pinAttendanceList.forEach((s, i) => {
+        if (y > 270) { // Add new page if needed
+            doc.addPage();
+            y = 20;
+        }
+        doc.text(`${i+1}. ${s.name} (${s.checkInTime})`, 10, y);
+        y += 8;
+    });
+    
+    doc.save("pin_attendance_report.pdf");
+}
+</script>
+
+<script src="/static/js/lecturer_page_js/theme.js"></script>
+</body>
+</html>

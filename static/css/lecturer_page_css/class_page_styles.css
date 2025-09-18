@@ -1,0 +1,215 @@
+.back-btn {
+    margin-bottom: 20px;
+    align-self: self-end;
+    display: inline-block;
+    cursor: pointer;
+    margin-right: 8px;
+    text-decoration: none;
+    margin-top: 6px;
+    color: goldenrod;
+}
+
+html.light-mode .back-btn {
+    color: black;
+}
+
+.back-btn a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.back-btn:hover {
+    color: darkgoldenrod;
+    text-decoration: underline;
+}
+
+html.light-mode #classTitle,
+html.light-mode #classDetails,
+html.light-mode .student-list-text{
+    color: rgb(0, 0, 0);
+}
+
+html.dark-mode #classTitle,
+html.dark-mode #classDetails,
+html.dark-mode .student-list-text,
+html.dark-mode .attendance-rec {
+    color: beige;
+}
+
+
+h1 {
+    color: goldenrod;
+}
+.student-list {
+    margin-top: 20px;
+    margin-right: 12px;
+    transition: margin-left var(--transition-speed),
+        background var(--transition-speed);
+}
+#className{
+    text-transform: uppercase;
+}
+.student-list-text, #classDetails, #classList, #className{
+    transition: margin-left var(--transition-speed),
+        background var(--transition-speed);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    transition: margin-left var(--transition-speed),
+        background var(--transition-speed);
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+    color: rgb(0, 0, 0);
+    font-weight: lighter;
+}
+html.dark-mode td{
+    color: beige;
+}
+th {
+    background-color: #f4f4f4;
+}
+#downloadBtn {
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    min-height: 40px;
+    min-width: 210px;
+    max-height: 50px;
+    max-width: 240px;
+    margin-left: 4px;
+    border-radius: 50px;
+    transition: margin-left var(--transition-speed),
+        background var(--transition-speed);
+}
+.navbar {
+    background: #f5f5dc;
+    padding: 0 15px;
+    height: 50px;
+    border-radius: 6px;
+    border: 2px solid darkgoldenrod;
+}
+.navdiv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.nav_links {
+    display: flex;
+    gap: 20px;
+}
+.nav_links a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: black;
+    font-size: 0.7rem;
+    text-decoration: none;
+}
+.nav_links i {
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+}
+
+.navbar_footer {
+    background: #f5f5dc;
+    padding: 0 15px;
+    height: 50px;
+    border-radius: 6px;
+    border: 2px solid darkgoldenrod;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+}
+
+.navdiv_footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.nav_links_footer {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+}
+
+.nav_links_footer a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: black;
+    font-size: 0.7rem;
+    text-decoration: none;
+}
+
+.nav_links_footer i {
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+}
+.nav_links a:hover , .nav_bar_section_footer a:hover{
+    color: darkgoldenrod;
+}
+.nav_links_footer{
+    color: rgb(0, 0, 0);
+    font-weight: bold;
+}
+
+ @media (max-width:748px){
+    #downloadBtn{
+        width: 160px;
+    }
+.navbar {
+    background: #f5f5dc;
+    padding: 0 15px;
+    height: 40px;
+    border-radius: 6px;
+    border-bottom-right-radius: 2px solid darkgoldenrod;
+}
+.navdiv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+}
+#logo:hover {
+    transform: scale(1.2);
+    transition: transform 0.3s ease;
+}
+.nav_links {
+    display: flex;
+    gap: 15px;
+}
+.nav_links a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgb(41, 6, 6);
+    font-size: 0.7rem;
+    text-decoration: none;
+}
+.nav_links a:hover{
+    color: darkgoldenrod;
+}
+.nav_links i {
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+.class-item{
+    font-size: smaller;
+}
+h3{
+    font-size: medium;
+}
+}

@@ -1,0 +1,388 @@
+
+.libre-baskerville-regular {
+    font-family: "Libre Baskerville", serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.libre-baskerville-bold {
+    font-family: "Libre Baskerville", serif;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.libre-baskerville-regular-italic {
+    font-family: "Libre Baskerville", serif;
+    font-weight: 400;
+    font-style: italic;
+}
+.nav_bar_section{}
+
+.navbar {
+    background: #f5f5dc;
+    padding: 0 15px;
+    height: 50px;
+    border-radius: 6px;
+    border: 2px solid darkgoldenrod;
+    position: inherit;
+    z-index: 1000;
+}
+.navdiv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+}
+#logo:hover {
+    transform: scale(1.2);
+    transition: transform 0.3s ease;
+}
+.nav_links {
+    display: flex;
+    gap: 20px;
+}
+.nav_links a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: black;
+    font-size: 0.7rem;
+    text-decoration: none;
+}
+.nav_links a:hover{
+    color: darkgoldenrod;
+}
+.nav_links i {
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+}
+.create_class_button {
+    text-align: center;
+    margin: 0px;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+.create_class_button button {
+    font-size: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background-color: darkgoldenrod;
+    color: beige;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+.create_class_button button:hover {
+    background-color: goldenrod;
+    color: white;
+}
+
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    width: 100%;
+}
+.modal-content {
+    background: linear-gradient(to top, rgba(220, 230, 240, 0.55)30%,rgba(220, 230, 240, 0.45)80%);
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.close {
+    float: right;
+    font-size: 26px;
+    cursor: pointer;
+}
+
+
+#classForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#classForm label {
+    font-weight: bold;
+    color: black;
+}
+#classForm input, #classForm select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid beige;
+}
+.btn-primary {
+    background: goldenrod;
+    color: beige;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.btn-primary:hover {
+    background: beige;
+    color: goldenrod;
+}
+.btn-secondary {
+    background: white;
+    color: darkgoldenrod;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.btn-secondary:hover {
+    background: darkgoldenrod;
+    color: white;
+}
+
+.class-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+    color: beige;
+}
+.sidebar.collapsed ~ .class-list {
+    margin-left: 3.5rem;
+}
+.class-item {
+    background: rgba(0, 0, 0, 0.4);
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    border-left: 6px solid darkgoldenrod;
+    border-top: 2px solid darkgoldenrod;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+.class-item:hover {
+    border-top: 0px ;
+    background: rgba(245,245,220,0.5);
+    color: black;
+    border-left: 6px solid rgb(255, 255, 255);
+    border-bottom:2px solid rgb(255, 255, 255) ;
+}
+.class-item h3 {
+    margin-bottom: 5px;
+}
+.class-item p {
+    margin: 0;
+    font-size: 14px;
+}
+.class-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f5f5f5;
+    padding: 10px;
+    margin: 8px 0;
+    border-radius: 6px;
+}
+
+.delete-btn {
+    background: transparent;
+    border: none;
+    color: red;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.delete-btn:hover {
+    color: darkred;
+}
+
+@media  (max-width: 748px) {
+    .modal-content{
+    padding: 20px;
+    border-radius: 10px;
+    width: 350px;
+    margin-left: 45px;
+    }
+    .create_class_button button {
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
+    }
+
+.navbar {
+    background: #f5f5dc;
+    padding: 0 15px;
+    height: 45px;
+    border-radius: 6px;
+    border-bottom: 2px solid darkgoldenrod;
+}
+.navdiv {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.nav_links {
+    display: flex;
+    gap: 15px;
+}
+.nav_links a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgb(41, 6, 6);
+    font-size: 0.7rem;
+    text-decoration: none;
+}
+.nav_links a:hover{
+    color: darkgoldenrod;
+}
+.nav_links i {
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+.class-item{
+    font-size: smaller;
+}
+.delete-btn{
+    font-size: small;
+}
+}
+
+html:not(.dark-mode) .class-list {
+    color: #222;
+}
+
+html:not(.dark-mode) .class-item {
+    background: #FFF8E7;
+    color: #222;
+    border-left: 6px solid darkgoldenrod;
+    border-top: 0;
+    border: 1px solid rgba(184,134,11,0.25);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+html:not(.dark-mode) .class-item:hover {
+    background: linear-gradient(  to top,rgba(255, 255, 255, 0.4)0%,rgba(245, 245, 255, 0.7) 40%,rgba(255, 255, 255, 0.7) 100%);
+    border-right: 3px solid;
+    border-right-color:goldenrod  ;
+    border-bottom: 2px solid goldenrod;
+}
+
+html.dark-mode .class-item {
+    background: rgba(0,0,0,0.4);
+    color: beige;
+    border-left: 6px solid darkgoldenrod;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+
+html.dark-mode .class-item:hover {
+    background: rgba(0,0,0,0.4);
+    color: beige;
+    border-left: 6px solid rgb(255, 255, 255);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+}
+html:not(.dark-mode) .navbar{
+    border-color: goldenrod;
+}
+html:not(.dark-mode) .nav_links a:hover{
+    color: goldenrod;
+}
+html:not(.dark-mode) .theme-toggle:hover, .mode-btn-text:hover{
+    color: goldenrod;
+}
+html:not(.dark-mode) .create_class_button button {
+    background-color: goldenrod;
+    color: beige;
+}
+html:not(.dark-mode) .create_class_button button:hover {
+    background-color: rgb(243, 178, 14);
+
+}
+html:not(.dark-mode) #className {
+    color: goldenrod;
+
+}
+
+
+
+
+.main-content1 {
+    margin-left: 12px;
+    margin-right: 12px;
+    margin-top: 20px;
+}
+
+
+/* Dashboard Styling */
+.welc {
+    font-size: 2rem;
+}
+
+.welcome-text {
+    font-size: 16px;
+    margin: 10px 0 20px;
+    color: black;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.dashboard-card {
+    background: linear-gradient(rgba(245, 245, 220, 0.4));
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    border-left: 2px solid goldenrod;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    color: #333;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+html.dark-mode .welc {
+    color: goldenrod;
+}
+
+html.dark-mode .welcome-text {
+    color: beige;
+}
+
+html.dark-mode .dashboard-card {
+    background: linear-gradient(rgba(0, 0, 0, 0.3));
+    padding: 20px;
+    text-align: center;
+    border-radius: 12px;
+    border-top: 0.2px solid goldenrod;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    color: beige;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-card i {
+    font-size: 28px;
+    color: goldenrod;
+    margin-bottom: 10px;
+}
+
+.dashboard-card h3 {
+    margin: 10px 0 5px;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

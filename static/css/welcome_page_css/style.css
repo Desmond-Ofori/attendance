@@ -1,0 +1,33 @@
+*{ margin: 0; padding: 0; }
+body{
+    width: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.6)30%,rgba(0, 0, 0, 0.9)80%), url("/static/pics/university-hat-2.jpg");
+    background-position: center;
+    background-size: cover;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+}
+.logo{ position: absolute; top:20px; left: 20px; transition: transform 0.3s ease; }
+.logo:hover { transform: scale(1.2); transition: transform 0.3s ease; }
+#webname{ color: goldenrod; position: relative; font-size: 3rem; font-family: Georgia, 'Times New Roman', Times, serif; margin-top: 70px; }
+.webtext{ text-align: center; position: relative; color: beige; opacity: 0.9; overflow-wrap:break-word ;
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+    font-size: 1.5rem; margin-top: 50px; margin-left: 30px; margin-right: 30px; }
+.button{ margin-top: 150px; display: block; }
+.button a{ width: 150px; text-decoration: none; display: inline-block; padding: 12px 0; color: beige ;
+    border: 1.4px solid darkgoldenrod; z-index: 1; transition: color 0.3s; text-align: center; font-weight: bolder; border-radius: 12px;
+    margin: 0; position: relative; overflow: hidden; }
+.button a span{ width: 0%; height: 100%; position: absolute; top: 0; left: 0; background: darkgoldenrod; z-index: -1;
+    transition: width 0.3s ease; border-radius: 12px; }
+.button a:hover span{ width: 100%; }
+.button a:hover{ color: beige; border: 1px solid rgba(0, 0, 0, 0.0); }
+@media (max-width: 600px) {
+    #webname { font-size: 2rem; }
+    .webtext { font-size: 1rem; }
+    .button a { width: 120px; padding: 10px 0; font-size: 0.9rem; }
+    .logo{ top: 10px; left: 10px; }
+}

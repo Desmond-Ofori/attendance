@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Account - TapIn</title>
+    <link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css">
+    <link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        (function () {
+            if (localStorage.getItem("darkMode") === "true") {
+                document.documentElement.classList.add("dark-mode");
+            }
+        })();
+    </script>
+    <style>
+        .verification-container{
+            color: black;
+        }
+        html.dark-mode .verification-container{
+            color: goldenrod;
+        }
+    </style>
+</head>
+<body>
+    <section class="nav_bar_section">
+        <nav class="navbar">
+            <div class="navdiv">
+                <div class="logo"></div>
+                <div class="nav_links">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+                    </button>
+                    <a href="{{ url_for('lecturer_notification') }}">
+                        <i class="far fa-bell"></i>
+                        <span>Notification</span>
+                    </a>
+                    <a href="{{ url_for('lecturer_profile') }}">
+                        <i class="far fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <div class="main-content1">
+        <div class="verification-container">
+            <h2>Verify Your Email</h2>
+            <p>We've sent a verification email to your account. Please check your inbox (and spam folder) for the link to verify your email.</p>
+            <p>Once verified, you'll have full access to your dashboard.</p>
+            
+            <button id="resendVerification" class="btn-primary">Resend Verification Email</button>
+            
+            <div id="resendMessage" style="display: none; margin-top: 10px;"></div>
+        </div>
+    </div>
+
+  <script src="/static/js/auth.js"></script>
+    <script src="/static/js/config.js"></script>
+    <script src="/static/js/lecturer_page_js/theme.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const resendBtn = document.getElementById("resendVerification");
+            const messageDiv = document.getElementById("resendMessage");
+
+            // Get email and role from sessionStorage (set during login/register)
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            const email = user.email || '';
+            const role = user.role || 'lecturer';
+
+            if (!email) {
+                messageDiv.textContent = 'Email not found. Please log in again.';
+                messageDiv.style.color = 'red';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            resendBtn.addEventListener('click', async () => {
+                resendBtn.disabled = true;
+                resendBtn.textContent = 'Sending...';
+                messageDiv.style.display = 'none';
+
+                try {
+                    const response = await fetch('/api/auth/resend', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, role: role }),
+                        credentials: 'same-origin'
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        messageDiv.textContent = data.message || 'Verification email resent successfully. Check your inbox.';
+                        messageDiv.style.color = 'green';
+                    } else {
+                        messageDiv.textContent = data.error || 'Failed to resend email. Please try again.';
+                        messageDiv.style.color = 'red';
+                    }
+                } catch (error) {
+                    console.error('Resend error:', error);
+                    messageDiv.textContent = 'Network error. Please check your connection.';
+                    messageDiv.style.color = 'red';
+                } finally {
+                    messageDiv.style.display = 'block';
+                    resendBtn.disabled = false;
+                    resendBtn.textContent = 'Resend Verification Email';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

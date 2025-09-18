@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notifications</title>
+  <link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+  <link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+  <link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+
+  <script>
+    // Apply dark mode immediately
+    (function () {
+      if (localStorage.getItem("darkMode") === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    })();
+  </script>
+
+  <style>
+    .notif-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .notif-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      background: #FFF8E7;
+      border: 1px solid rgba(184, 134, 11, 0.25);
+    }
+
+    .notif-item.read {
+      opacity: 0.7;
+      text-decoration: line-through;
+    }
+
+    .notif-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .badge {
+      font-size: .75rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: goldenrod;
+      color: #fff;
+    }
+
+    html.dark-mode .notif-list {
+      color: darkgoldenrod;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <section class="nav_bar_section">
+    <nav class="navbar">
+      <div class="navdiv">
+        <div class="logo"></div>
+        <div class="nav_links">
+          <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+            <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+          </button>
+          <a href="{{ url_for('lecturer_notification') }}"><i class="far fa-bell"></i><span>Notification</span></a>
+          <a href="{{ url_for('lecturer_profile') }}"><i class="far fa-user"></i><span>Profile</span></a>
+        </div>
+      </div>
+    </nav>
+  </section>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <button class="toggle-btn" id="toggleBtn"><i class="fas fa-bars"></i></button>
+      <h2>Edu-Portal</h2>
+    </div>
+    <div class="menu">
+      <div class="menu-category">Home</div>
+      <a href="{{ url_for('lecturer_home') }}" class="menu-item"><i class="fas fa-home"></i><span
+          class="menu-text">Home</span></a>
+      <div class="menu-category">Academic</div>
+      <a href="{{ url_for('lecturer_dashboard') }}" class="menu-item"><i class="fas fa-book"></i><span class="menu-text">My
+          Classes</span></a>
+      <div class="menu-category">Lecturer Info</div>
+      <a href="{{ url_for('lecturer_announcements') }}" class="menu-item"><i class="fas fa-bullhorn"></i><span
+          class="menu-text">Announcement</span></a>
+      <a href="{{ url_for('lecturer_profile') }}" class="menu-item"><i class="fas fa-user"></i><span
+          class="menu-text">Profile</span></a>
+      <a href="{{ url_for('lecturer_settings') }}" class="menu-item"><i class="fas fa-cog"></i><span
+          class="menu-text">Settings</span></a>
+      <div class="menu-category">About</div>
+      <a href="{{ url_for('lecturer_about') }}" class="menu-item"><i class="fas fa-info-circle"></i><span class="menu-text">About
+          Us</span></a>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="card">
+      <h1>Notifications <span id="unreadCount" class="badge">0</span></h1>
+      <div style="margin: 6px 0 12px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="markAllRead" class="btn-secondary">Mark All Read</button>
+        <button id="clearAll" class="btn-primary">Clear All</button>
+      </div>
+      <ul id="notifList" class="notif-list"></ul>
+    </div>
+  </div>
+
+  <script src="/static/js/lecturer_page_js/theme.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const notifList = document.getElementById("notifList");
+      const unreadCount = document.getElementById("unreadCount");
+      const markAllReadBtn = document.getElementById("markAllRead");
+      const clearAllBtn = document.getElementById("clearAll");
+      const seedBtn = document.getElementById("seedDemo");
+
+      const TOKEN = sessionStorage.getItem("tapin_token"); // JWT
+
+      async function api(endpoint, options = {}) {
+        const res = await fetch(endpoint, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${TOKEN}`
+          },
+          ...options
+        });
+        return await res.json();
+      }
+
+      async function loadNotifs() {
+        const items = await api("/api/notifications/");
+        notifList.innerHTML = "";
+        let unread = 0;
+
+        items.forEach(n => {
+          if (!n.read) unread++;
+          const li = document.createElement("li");
+          li.className = "notif-item" + (n.read ? " read" : "");
+          li.innerHTML = `
+            <div>
+              <strong>${n.text}</strong><br>
+              <small>${new Date(n.timestamp).toLocaleString()}</small>
+            </div>
+            <div class="notif-actions">
+              <button class="btn-secondary mark-btn">${n.read ? 'Unread' : 'Read'}</button>
+              <button class="delete-btn">✖</button>
+            </div>
+          `;
+
+          // Toggle read/unread
+          li.querySelector(".mark-btn").addEventListener("click", async () => {
+            await api(`/api/notifications/${n.id}/toggle`, { method: "PATCH" });
+            loadNotifs();
+          });
+
+          // Delete notification
+          li.querySelector(".delete-btn").addEventListener("click", async () => {
+            await api(`/api/notifications/${n.id}`, { method: "DELETE" });
+            loadNotifs();
+          });
+
+          notifList.appendChild(li);
+        });
+
+        unreadCount.textContent = unread;
+      }
+
+      markAllReadBtn.addEventListener("click", async () => {
+        await api("/api/notifications/mark-all-read", { method: "POST" });
+        loadNotifs();
+      });
+
+      clearAllBtn.addEventListener("click", async () => {
+        await api("/api/notifications/clear", { method: "DELETE" });
+        loadNotifs();
+      });
+
+      seedBtn.addEventListener("click", async () => {
+        await api("/api/notifications/seed", { method: "POST" });
+        loadNotifs();
+      });
+
+      loadNotifs();
+    });
+  </script>
+</body>
+
+</html>

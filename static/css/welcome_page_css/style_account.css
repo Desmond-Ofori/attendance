@@ -1,0 +1,109 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+body{
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    width: 100%;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 30%, rgba(0, 0, 0, 0.9) 80%), url("/static/pics/university-hat-2.jpg");
+    background-position: center;
+    background-size: cover;
+    height: 100%;
+}
+#initial_section{
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+    width: 100%;
+    max-width: 450px;
+    min-height: 400px;
+    height: auto;
+    background: linear-gradient(to top, rgba(220, 230, 240, 0.55)30%,rgba(220, 230, 240, 0.45)80%);
+    color: #000000;
+    border-radius: 10px;
+    border: 2px solid rgba(184, 135, 11, 0.349);
+    box-sizing: border-box;
+}
+.header-group{
+     margin-bottom: 0px; 
+     margin-top: 0px;
+     padding: 0px;
+    }
+h1{ text-align: center; 
+    font-size: 3rem; 
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    color: goldenrod; 
+    margin-bottom: 0px;
+ }
+.slogan{ margin:30px ;
+     position: static; 
+     text-align: center; 
+     font-size: 1.4rem; 
+     font-family: 'Algerian', 
+     serif; margin-bottom: 3px; }
+.webname{ 
+    align-content: center; 
+}
+.logo{ 
+    position: static;
+     margin-top: 0px; 
+     margin-bottom: 0px; 
+    }
+.role-choices-container { display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 25px; margin-top: 0px;
+    margin-right: 2px; gap: 3rem; }
+.role1, .role2 { font-size: 1.29rem; padding: 12px; }
+.text_input_choice{ position: static; font-size: 1.659rem; color: goldenrod; margin-bottom: 0px; }
+input[type="radio"] { display: none; }
+label { position: relative; padding-left: 28px; cursor: pointer; }
+label::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border: 2px solid #D4AF37; border-radius: 50%; }
+input[type="radio"]:checked + label::before { background-color: #D4AF37; box-shadow: inset 0 0 0 4px #fff; }
+.button-group{ display: flex; flex-direction: row; gap: 10px; }
+.button, .button1{ position: static; margin-bottom: 0px; margin-top: 0px; }
+.button a, .button1 a { width: 150px; text-decoration: none; display: inline-block; padding: 12px 0; color: black ;
+    border: 1.4px solid goldenrod; z-index: 1; transition: color 0.3s; text-align: center; font-weight: bolder; border-radius: 12px;
+    margin: 0; position: relative; }
+.button a span, .button1 a span{ width: 0%; height: 100%; position: absolute; top: 0; left: 0; background: darkgoldenrod; z-index: -1; transition: 0.3s; border-radius: 12px; }
+.button a:hover span, .button1 a:hover span{ width: 100%; }
+.button a:hover, .button1 a:hover{ color: beige; border: 1px solid rgba(0, 0, 0, 0.0); }
+
+@media(max-width: 600px){
+    body{
+        padding: 20px;
+    }
+    #initial_section{
+        padding: 20px;
+        width: 100%;
+        max-width: 100%;
+        min-height: auto;
+        height: auto;
+    }
+    h1{ font-size: 2.2rem; }
+    .slogan{ font-size: 1.1rem; 
+        margin: 15px; }
+    .role-choices-container { flex-direction: column; 
+        gap: 0.5rem; 
+        margin-bottom: 15px; 
+    }
+    .role1, .role2 { 
+        font-size: 1rem; 
+        padding: 8px;
+    }
+    .text_input_choice{ 
+        font-size: 1.1rem; 
+        margin-bottom: 0px; 
+    }
+    .button a, .button1 a { 
+        width: 120px; padding: 
+        10px 0; font-size: 0.8rem; 
+    }
+    .button-group{ 
+        flex-direction: 
+        column; gap: 6px; 
+        align-items: center;}
+}

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/static/pics/attendance_app_icon.png" type="image/png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <link rel="stylesheet" href="/static/css/lecturer_page_css/lecturer_style.css">
+  <link rel="stylesheet" href="/static/css/lecturer_page_css/menu.css">
+  <title>TapIn Home(Lecturer)</title>
+
+  <script>
+    (function () {
+      if (localStorage.getItem("darkMode") === "true") {
+        document.documentElement.classList.add("dark-mode");
+      }
+    })();
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap');
+  </style>
+</head>
+
+<body>
+
+    <section class="nav_bar_section">
+        <nav class="navbar">
+            <div class="navdiv">
+                <div class="logo"></div>
+                <div class="nav_links">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <p id="mode-btn" class="mode-btn-text">Dark mode</p>
+                    </button>
+                    <a href="{{ url_for('lecturer_notification') }}">
+                        <i class="far fa-bell"></i>
+                        <span>Notification</span>
+                    </a>
+                    <a href="{{ url_for('lecturer_profile') }}">
+                        <i class="far fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+  <div class="main-content1">
+    <h2 class="welc">Welcome!</h2>
+    <p class="welcome-text">Here’s your quick overview for today.</p>
+
+    <div class="dashboard-grid">
+      <a href="{{ url_for('lecturer_dashboard') }}" class="dashboard-card">
+        <i class="fa fa-chalkboard"></i>
+        <h3>Classes</h3>
+        <p>Create a class or enter a class that's already created</p>
+      </a>
+      <a href="{{ url_for('lecturer_profile') }}" class="dashboard-card">
+        <i class="fa fa-user"></i>
+        <h3>Profile</h3>
+        <p>View or edit your details</p>
+      </a>
+      <a href="{{ url_for('lecturer_notification') }}" class="dashboard-card">
+        <i class="fa fa-bell"></i>
+        <h3>Notifications</h3>
+        <p>See updates and announcements</p>
+      </a>
+      <a href="{{ url_for('lecturer_settings') }}" class="dashboard-card">
+        <i class="fas fa-cog"></i>
+        <h3>Settings</h3>
+        <p>Easily update your info here</p>
+      </a>
+      <a href="{{ url_for('lecturer_about') }}" class="dashboard-card">
+        <i class="fas fa-info-circle"></i>
+        <h3>About Us</h3>
+        <p>Know about us</p>
+      </a>
+      <a href="{{ url_for('lecturer_announcements') }}" class="dashboard-card">
+        <i class="fas fa-bullhorn"></i>
+        <h3>Announcement</h3>
+        <p>Read recent announcements</p>
+      </a>
+    </div>
+  </div>
+
+
+  <script src="/static/js/lecturer_page_js/lecturer_javascript.js"></script>
+  <script src="/static/js/lecturer_page_js/theme.js"></script>
+
+</body>
+
+</html>
