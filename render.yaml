@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: tapin-attendance-app
+    runtime: python
+    buildCommand: "cd tapin_backend && pip install --upgrade pip && pip install -r requirements.txt && FLASK_APP=wsgi:app flask db upgrade"
+    startCommand: "gunicorn --bind 0.0.0.0:$PORT --worker-class eventlet wsgi:app"
+    envVars:
+      - key: DATABASE_URL
+        generateValue: true
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: FLASK_ENV
+        value: production
+      - key: DEBUG
+        value: "False"
